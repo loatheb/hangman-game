@@ -59,6 +59,10 @@ class Gamer {
         console.log(`Guess Word: ${this.currentGuessLetter}`);
         console.log('--------------------------------------');
 
+        if (!this.currentGuessLetter) {
+            return this.next(this.nextWord(), this.nextWordResolver.bind(this));
+        }
+
         return guessWord({
             sessionId: this.sessionId,
             guess: this.currentGuessLetter.toUpperCase(),
@@ -114,7 +118,9 @@ class Gamer {
                 i--;
             }
         }
-        return this.guessList.shift();
+        const nextWord = this.guessList.shift();
+
+        return nextWord;
     }
     getResult() {
         return getResult({
