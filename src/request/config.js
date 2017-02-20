@@ -8,4 +8,4 @@ const defaultRequestOptions = {
 module.exports = {
     playerId,
     defaultRequestOptions,
-}
+};

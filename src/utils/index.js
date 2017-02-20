@@ -3,4 +3,4 @@ exports.handleResponse = (res) => {
         throw new Error(res, 'Return Error');
     }
     return res.data;
-}
+};

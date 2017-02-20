@@ -1,2 +1,4 @@
-const Gamer = require('./src')
-new Gamer();
+const Gamer = require('./src');
+
+const gamer = new Gamer();
+gamer.start();

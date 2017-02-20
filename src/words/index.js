@@ -3,32 +3,21 @@ const wordListPath = require('word-list');
 
 const wordArray = fs.readFileSync(wordListPath, 'utf8').split('\n');
 
-exports.getWordsByLength = (len) => {
-    return wordArray.filter((word) => {
-        return word.length === len;
-    });
-};
-
-exports.getWordsStartBy = (str, words = wordArray) => {
-    const reg = new RegExp(`^${str}`);
-    return words.filter((word) => {
-        return reg.test(word);
-    });
-};
+exports.getWordsByLength = len => wordArray.filter(word => word.length === len);
 
 exports.filterWordsByPosition = (position, words = wordArray) => {
-    return words.filter((word) => {
-        const array = word.split('');
-        const positionList = Object.keys(position);
-        if (positionList.length) {
-            return positionList.every((pos) => {
-                return array[pos] === position[pos];
-            });
-        } else {
-            return words;
+    const hasWords = Object.values(position);
+
+    return words.filter(word => word.split('').every((letter, index) => {
+        const mapLetter = position[index];
+        if (mapLetter && mapLetter === letter) {
+            return true;
+        } else if (!mapLetter && hasWords.indexOf(letter) === -1) {
+            return true;
         }
-    });
-}
+        return false;
+    }));
+};
 
 exports.findFrequenceWords = (words = wordArray) => {
     const map = new Map();
@@ -41,22 +30,12 @@ exports.findFrequenceWords = (words = wordArray) => {
             } else {
                 map.set(letter, 1);
             }
-        })
-    });
-
-    return [...map].sort((memo, current) => {
-                // [key, value]
-                return current[1] - memo[1];
-            })
-            .map((item) => {
-                return item[0];
-            });
-};
-
-exports.filterWordsByWord = (letter, words = wordArray) => {
-    return words.filter((word) => {
-        return word.split('').every((l) => {
-            return l !== letter;
         });
     });
-}
+
+    return [...map]
+            .sort((memo, current) => current[1] - memo[1]) // [key, value]
+            .map(item => item[0]);
+};
+
+exports.filterWordsByWord = (targetLetter, words = wordArray) => words.filter(word => word.split('').every(letter => letter !== targetLetter));
