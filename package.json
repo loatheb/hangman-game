@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "./node_modules/.bin/eslint *.js"
   },
   "keywords": [],
   "author": "",

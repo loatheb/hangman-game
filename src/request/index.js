@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 const request = require('./request');
 
 const ACTIONS = 'startGame nextWord guessWord getResult';
@@ -7,6 +8,10 @@ ACTIONS.split(' ').forEach((action) => {
         const postData = Object.assign({}, {
             action,
         }, data);
-        return request(postData);
+        return request(postData)
+                .catch((msg) => {
+                    console.log(`${action}: ${msg}!`);
+                    return request(postData);
+                });
     };
 });

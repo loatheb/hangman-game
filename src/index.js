@@ -1,4 +1,5 @@
 /* eslint no-console: "off" */
+/* eslint class-methods-use-this: "off"*/
 const chalk = require('chalk');
 
 const words = require('./words');
@@ -32,36 +33,34 @@ class Gamer {
         this.words = [];
         this.word = '';
     }
-    start() {
-        startGame()
-            .then((res) => {
-                this.sessionId = res.sessionId;
-                this.numberOfGuessAllowedForEachWord = res.data.numberOfGuessAllowedForEachWord;
-                this.numberOfWordsToGuess = res.data.numberOfWordsToGuess;
-
-                return this.next(this.nextWord(), this.nextWordResolver.bind(this));
-            });
-    }
     next(action, resolver) {
         action
             .then(handleResponse)
             .then(resolver);
     }
+    start() {
+        startGame()
+            .then((res) => {
+                const { sessionId, data } = res;
+                const { numberOfGuessAllowedForEachWord, numberOfWordsToGuess } = data;
+                this.sessionId = sessionId;
+                this.numberOfGuessAllowedForEachWord = numberOfGuessAllowedForEachWord;
+                this.numberOfWordsToGuess = numberOfWordsToGuess;
+
+                return this.next(this.nextWord(), this.nextWordResolver.bind(this));
+            });
+    }
     nextWord() {
         const sessionId = this.sessionId;
-        log(`SessionId: ${sessionId}`);
         return nextWord({
             sessionId,
         });
     }
     nextWordResolver(data) {
         // nextWord response data here
-        const {
-            word,
-        } = data;
+        const { word } = data;
         this.word = word;
         this.words = getWordsByLength(word.length);
-        this.guessList = findFrequenceWords(this.words);
         this.incorrectGuessCount = 0;
         return this.next(this.guessWord(), this.guessWordResolver.bind(this));
     }
@@ -70,20 +69,20 @@ class Gamer {
             log(success('Correct'));
             const position = this.generateCurrentPosition(this.word);
             this.words = filterWordsByPosition(position, this.words);
-            this.guessList = findFrequenceWords(this.words);
-            this.currentGuessLetter = this.findNextGuessLetter();
         } else {
             log(error('Non Correct'));
             this.words = filterWordsByWord(this.currentGuessLetter, this.words);
-            this.guessList = findFrequenceWords(this.words);
-            this.currentGuessLetter = this.findNextGuessLetter();
         }
-        log(`Incorrect Guess Count: ${this.incorrectGuessCount}`);
-        log(`Guess Word: ${this.currentGuessLetter}`);
+        this.guessList = findFrequenceWords(this.words);
+        this.currentGuessLetter = this.findNextGuessLetter();
 
         if (!this.currentGuessLetter) {
+            log(error('Cannot find this Word in Dictionary! Jump It!'));
             return this.next(this.nextWord(), this.nextWordResolver.bind(this));
         }
+
+        log(`Incorrect Guess Count: ${this.incorrectGuessCount}`);
+        log(`Guess Word: ${this.currentGuessLetter}`);
 
         return guessWord({
             sessionId: this.sessionId,
@@ -92,25 +91,27 @@ class Gamer {
     }
     guessWordResolver(data) {
         // guessWord response here
-        const {
-            word,
-            totalWordCount,
-            wrongGuessCountOfCurrentWord,
-        } = data;
-        log('------------------------');
+        const { word, totalWordCount, wrongGuessCountOfCurrentWord } = data;
+
+        log('\n\n');
         log(info(`Current Word is ${word}`));
         log(info(`TotalWordCount: ${totalWordCount}`));
         log(info(`WrongGuessCountOfCurrentWord: ${wrongGuessCountOfCurrentWord}`));
-        log('------------------------');
+        log('\n\n');
+
         const hasTargetLetter = /[\\*]/;
-        const status = !(word === this.word);
-        if (!status) {
+        const correct = (word !== this.word);
+
+        if (!correct) {
             this.incorrectGuessCount += 1;
         }
-        const hasToGuess = hasTargetLetter.test(word) && this.incorrectGuessCount < this.numberOfGuessAllowedForEachWord;
+
+        const hasToGuess = hasTargetLetter.test(word)
+                           && this.incorrectGuessCount < this.numberOfGuessAllowedForEachWord
+                           && totalWordCount < this.numberOfWordsToGuess;
         if (hasToGuess) {
             this.word = word;
-            return this.next(this.guessWord(status), this.guessWordResolver.bind(this));
+            return this.next(this.guessWord(correct), this.guessWordResolver.bind(this));
         }
         if (totalWordCount === this.numberOfWordsToGuess) {
             this.next(this.getResult(), this.getResultResolver.bind(this));
@@ -141,17 +142,20 @@ class Gamer {
                 i -= 1;
             }
         }
-        const nextWord = this.guessList.shift();
-
-        return nextWord;
+        return this.guessList.shift();
     }
     getResult() {
+        const sessionId = this.sessionId;
+        log(`SessionId: ${sessionId}`);
         return getResult({
             sessionId: this.sessionId,
         });
     }
     getResultResolver(data) {
-        console.log(data);
+        const { totalWrongGuessCount, totalWordCount, correctWordCount, score } = data;
+        log(`Result: ${correctWordCount}/${totalWordCount}`);
+        log(`WrongGuess: ${totalWrongGuessCount}`);
+        log(success(`Score: ${score}`));
     }
 }
 
