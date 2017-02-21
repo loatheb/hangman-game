@@ -39,6 +39,10 @@
 
   7. 如果猜测次数达到单个单词上限，则跳过继续下一个词。
 
+### 演示
+
+![https://github.com/loatheb/Hangman-Game/blob/master/imgs/hangman-game.gif](https://github.com/loatheb/Hangman-Game/blob/master/imgs/hangman-game.gif)
+
 ### 结果
 代码完成后，完整的跑了两次，分数大概在 **1340** 左右，正确率 **77/80** 错误猜测数大概在 **190 ~ 210** 之间。
 
