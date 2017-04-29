@@ -1,5 +1,8 @@
 # Hangman Game
 
+### 结果
+代码完成后，完整的跑了两次，分数大概在 **1340** 左右，正确率 **77/80** 错误猜测数大概在 **190 ~ 210** 之间。
+
 ### 文件结构
 
 * `src`目录下，`request`代表封装为`promise`的请求，`utils`下是常用的函数，`words`下是对所有英文单词封装的一些方法。
@@ -43,8 +46,7 @@
 
 ![https://github.com/loatheb/Hangman-Game/blob/master/imgs/hangman-game.gif](https://github.com/loatheb/Hangman-Game/blob/master/imgs/hangman-game.gif)
 
-### 结果
-代码完成后，完整的跑了两次，分数大概在 **1340** 左右，正确率 **77/80** 错误猜测数大概在 **190 ~ 210** 之间。
+### 难点分析
 
 主要的难度在前期单词长度比较短的情况，目标单词列表过多，例如：
 
